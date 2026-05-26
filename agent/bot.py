@@ -14,6 +14,30 @@ CONFIRMATIONS_FILE = "/data/confirmations.json"
 TOTAL_CONTACTS = 2820
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
+ALLOWED_USERS = [40603594]  # MANAGER_CHAT_ID
+
+
+def manager_only(func):
+    from functools import wraps
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        if update.effective_user.id not in ALLOWED_USERS:
+            await update.message.reply_text("Доступ запрещён.")
+            return
+        return await func(update, context, *args, **kwargs)
+    return wrapper
+
+
+def manager_only_callback(func):
+    from functools import wraps
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        if update.effective_user.id not in ALLOWED_USERS:
+            await update.callback_query.answer("Доступ запрещён.")
+            return
+        return await func(update, context, *args, **kwargs)
+    return wrapper
+
 user_data = {}
 chat_history = {}
 
