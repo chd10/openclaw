@@ -91,6 +91,7 @@ def get_valli_invite_template(name, unsubscribe_link, track_url=""):
         f'<p style="color: #666; font-size: 13px;">'
         f'Валли работает в Telegram. Просто напишите ему артикул или модель оборудования — '
         f'и он всё найдёт.</p>'
+        f'<p style="color: #666; font-size: 13px;">🔒 Ваши запросы конфиденциальны</p>'
     )
 
     nb_block = (
