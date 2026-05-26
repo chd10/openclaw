@@ -16,6 +16,33 @@ client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 ALLOWED_USERS = [40603594]  # MANAGER_CHAT_ID
 
+_USAGE_FILE = "/data/token_usage.json"
+
+
+def _log_token_usage(response) -> None:
+    """Append token usage record for cost tracking by check_balance.py."""
+    try:
+        usage = response.usage
+        record = {
+            "ts":            __import__("datetime").datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "model":         response.model,
+            "input_tokens":  usage.input_tokens,
+            "output_tokens": usage.output_tokens,
+        }
+        try:
+            with open(_USAGE_FILE) as f:
+                records = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            records = []
+        records.append(record)
+        # Keep last 10 000 records (~3 months of heavy use)
+        if len(records) > 10_000:
+            records = records[-10_000:]
+        with open(_USAGE_FILE, "w") as f:
+            json.dump(records, f)
+    except Exception:
+        pass
+
 
 def manager_only(func):
     from functools import wraps
