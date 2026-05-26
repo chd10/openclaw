@@ -597,6 +597,7 @@ async def export_log_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     )
 
 
+@manager_only
 async def schedule_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.message.reply_text(
