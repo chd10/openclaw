@@ -581,6 +581,7 @@ async def email_log_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(msg)
 
 
+@manager_only
 async def export_log_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     import email_log as el
     xlsx_path = el.get_xlsx_path()
