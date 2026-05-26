@@ -440,6 +440,7 @@ async def campaign_progress_command(update: Update, context: ContextTypes.DEFAUL
     )
 
 
+@manager_only
 async def week_report_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from datetime import datetime, timedelta
     confs = _load_json(CONFIRMATIONS_FILE, {})
