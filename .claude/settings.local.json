@@ -28,7 +28,13 @@
       "Bash(docker exec valli-valli-1 *)",
       "Bash(git init *)",
       "Bash(git config *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Skill(update-config)",
+      "Bash(bash /tmp/pre_hook_test.sh)",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(apt-get install *)",
+      "Bash(jq --version)"
     ]
   }
 }
