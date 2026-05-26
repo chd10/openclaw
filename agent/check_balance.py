@@ -218,14 +218,6 @@ def main() -> None:
         tg_send(msg)
         logger.warning("Spend alert sent: $%.2f >= threshold $%.2f", spend, ALERT_USD)
     else:
-        msg = (
-            f"✅ Anthropic API работает\n"
-            f"Расход за месяц (оценка): ${spend:.2f}\n"
-            f"По моделям:\n{model_lines}\n\n"
-            f"(реальный баланс недоступен — используется оценка по токенам)\n"
-            f"Баланс: https://console.anthropic.com/settings/billing"
-        )
-        tg_send(msg)
         logger.info(
             "Spend $%.2f < threshold $%.2f — OK. By model: %s",
             spend, ALERT_USD, by_model or "no data",
