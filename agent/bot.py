@@ -41,6 +41,7 @@ def manager_only_callback(func):
 user_data = {}
 chat_history = {}
 
+@manager_only
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("📧 Новая рассылка", callback_data="new")],
