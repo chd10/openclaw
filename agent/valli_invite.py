@@ -75,8 +75,9 @@ def _save_to_sent(msg):
             imap.login(SMTP_USER, SMTP_PASS)
             folder = _find_sent_folder(imap)
             imap.append(folder, "\\Seen", imaplib.Time2Internaldate(time.time()), msg.as_bytes())
+        logger.info("IMAP: письмо сохранено в «Отправленные»")
     except Exception as e:
-        print(f"IMAP: не удалось сохранить в «Отправленные»: {e}", flush=True)
+        logger.warning("IMAP: не удалось сохранить в «Отправленные»: %s", e)
 
 
 def _send_one(to_email, name):
@@ -93,9 +94,11 @@ def _send_one(to_email, name):
     msg["Message-ID"] = make_msgid(domain="ediscom.ru")
     msg.attach(MIMEText(html, "html"))
 
+    logger.info("Отправка письма Валли: %s → %s (%s)", SMTP_USER, to_email, SMTP_SERVER)
     with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
         server.login(SMTP_USER, SMTP_PASS)
         server.send_message(msg)
+    logger.info("Письмо Валли доставлено: %s", to_email)
 
     _save_to_sent(msg)
     return track_token
