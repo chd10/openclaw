@@ -476,6 +476,7 @@ async def week_report_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     await update.message.reply_text(msg)
 
 
+@manager_only
 async def last_send_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     progress = _load_json(CAMPAIGN_PROGRESS_FILE,
                           {"sent": [], "failed": [], "today_count": 0,
