@@ -137,9 +137,10 @@ def run_invites(limit=None):
             }
             _save_json(INVITES_FILE, invites)
             results["sent"].append(email)
+            logger.info("Приглашение Валли записано: %s (token=%s)", email, token)
             time.sleep(2)
         except Exception as e:
-            print(f"Ошибка отправки на {email}: {e}", flush=True)
+            logger.error("Ошибка отправки на %s: %s", email, e)
             results["failed"].append({"email": email, "error": str(e)})
 
     return results
