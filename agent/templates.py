@@ -27,9 +27,22 @@ def get_template(variant, name, confirm_link, unsubscribe_link, track_url=""):
     elif variant == 3:
         body = f'<h2 style="color: #0066cc;">Подтверждение подписки</h2><p>Приветствую, {name}!</p><p>Вы неоднократно получали наши письма и, надеемся, они были полезны. Мы ценим каждого клиента и хотим быть с вами на связи - но только если вы этого хотите.</p><p>В соответствии с актуальными требованиями законодательства о персональных данных просим вас подтвердить, что наши письма вам интересны.</p>' + button3 + '<p style="color: #666; font-size: 13px;">Спасибо, что были с нами. И надеемся, что останетесь.</p>'
 
+    valli_block = (
+        '<div style="background:#f0f7ff; padding:15px; border-radius:4px; margin: 20px 0; text-align:center;">'
+        '<p style="margin:0 0 10px 0; font-size:14px; color:#333;">'
+        'Узнайте цены на оборудование Cisco, Huawei, Fortinet мгновенно 🤖'
+        '</p>'
+        '<a href="https://t.me/Wally0526_bot?start=email_utm" '
+        'style="background-color:#0066cc; color:white; padding:10px 25px; '
+        'text-decoration:none; border-radius:4px; font-size:14px;">'
+        'Спросить у Валли →'
+        '</a>'
+        '</div>'
+    )
+
     pixel = (f'<img src="{track_url}" width="1" height="1" style="display:none" alt="">'
              if track_url else "")
-    return header + body + nb_block + footer.replace("</body></html>", pixel + "</body></html>")
+    return header + body + nb_block + valli_block + footer.replace("</body></html>", pixel + "</body></html>")
 
 
 def get_subject(variant):
