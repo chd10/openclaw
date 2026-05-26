@@ -315,6 +315,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_data[uid]["tone"] = tone
         await query.edit_message_text(f"✅ Тон установлен: {tone}")
 
+@manager_only
 async def send_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(context.args) < 2:
         await update.message.reply_text("Использование: /send email@example.com Имя Фамилия")
