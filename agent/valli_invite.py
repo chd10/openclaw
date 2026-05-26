@@ -2,6 +2,7 @@ import os
 import json
 import time
 import uuid
+import logging
 import smtplib
 import imaplib
 from datetime import datetime
@@ -10,6 +11,9 @@ from email.mime.multipart import MIMEMultipart
 from email.utils import formatdate, make_msgid
 
 from templates import get_valli_invite_template, VALLI_INVITE_SUBJECT
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger(__name__)
 
 CONFIRMATIONS_FILE = "/data/confirmations.json"
 INVITES_FILE       = "/data/valli_invites.json"
