@@ -31,10 +31,45 @@
       "Bash(git add *)",
       "Bash(git commit *)",
       "Skill(update-config)",
-      "Bash(bash /tmp/pre_hook_test.sh)",
-      "Bash(echo \"Exit: $?\")",
-      "Bash(apt-get install *)",
-      "Bash(jq --version)"
+      "Bash(git checkout *)",
+      "Bash(git -C /opt/openclaw log --oneline)",
+      "Bash(git -C /opt/valli log --oneline)",
+      "Bash(timedatectl show *)",
+      "Read(//etc/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(jq -r '.tool_input.file_path // empty'); if [ -z \"$FILE\" ]; then exit 0; fi; if echo \"$FILE\" | grep -q '/opt/valli'; then REPO=/opt/valli; elif echo \"$FILE\" | grep -q '/opt/openclaw'; then REPO=/opt/openclaw; else exit 0; fi; FNAME=$(basename \"$FILE\"); cd \"$REPO\" && git add -A && git diff --cached --quiet || git commit -m \"snapshot: before editing $FNAME\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(jq -r '.tool_input.file_path // empty'); if [ -z \"$FILE\" ]; then exit 0; fi; if echo \"$FILE\" | grep -q '/opt/valli'; then REPO=/opt/valli; elif echo \"$FILE\" | grep -q '/opt/openclaw'; then REPO=/opt/openclaw; else exit 0; fi; FNAME=$(basename \"$FILE\"); cd \"$REPO\" && git add -A && git diff --cached --quiet || git commit -m \"edit: $FNAME\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"systemMessage\": \"Для отката выполните: git revert HEAD\"}'"
+          }
+        ]
+      }
     ]
   }
 }
