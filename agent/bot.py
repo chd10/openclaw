@@ -172,7 +172,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Рассылка №2 — реактивация:\n"
         "- Отправитель: newsletter@ediscom.ru через Яндекс SMTP (smtp.yandex.ru:465 SSL, "
         "переменные SMTP_EDISCOM_USER/SMTP_EDISCOM_PASS).\n"
-        "- Расписание: 10:30, 11:30, 12:30 — по 10 писем (итого 30/день).\n"
+        "- Расписание: 10:30 (40 писем), 11:30 (40 писем), 12:30 (20 писем) — итого 100 писем/день.\n"
         "- Контакты подтягиваются из Битрикс24, прогресс в reactivation_progress.json.\n"
         "- Код: reactivation_campaign.py.\n"
         "\n"
