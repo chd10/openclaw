@@ -419,6 +419,7 @@ async def daily_report_command(update: Update, context: ContextTypes.DEFAULT_TYP
     )
 
 
+@manager_only
 async def campaign_progress_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     progress = _load_json(CAMPAIGN_PROGRESS_FILE,
                           {"sent": [], "today_count": 0, "today_date": None})
