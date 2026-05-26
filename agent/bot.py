@@ -338,6 +338,7 @@ async def pause_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     open(PAUSE_FLAG, "w").close()
     await update.message.reply_text("⏸ Рассылка приостановлена. /resume для возобновления.")
 
+@manager_only
 async def resume_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not os.path.exists(PAUSE_FLAG):
         await update.message.reply_text("▶️ Рассылка уже активна")
