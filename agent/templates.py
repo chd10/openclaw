@@ -37,6 +37,7 @@ def get_template(variant, name, confirm_link, unsubscribe_link, track_url=""):
         'text-decoration:none; border-radius:4px; font-size:14px;">'
         'Спросить у Валли →'
         '</a>'
+        '<p style="margin:10px 0 0 0; font-size:12px; color:#666;">🔒 Ваши запросы конфиденциальны</p>'
         '</div>'
     )
 
