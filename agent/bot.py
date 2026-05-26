@@ -903,6 +903,7 @@ async def client_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("\n".join(lines))
 
 
+@manager_only
 async def send_valli_invite_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     import valli_invite
     limit = None
