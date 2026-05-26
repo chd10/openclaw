@@ -194,6 +194,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     reply = response.content[0].text
     chat_history[uid].append({"role": "assistant", "content": reply})
+    _log_token_usage(response)
 
     try:
         reply_clean = reply.strip().replace("```json", "").replace("```", "").strip()
