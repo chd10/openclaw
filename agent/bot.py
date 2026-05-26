@@ -514,6 +514,7 @@ async def last_send_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(msg)
 
 
+@manager_only
 async def reactivation_stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     path = "/data/reactivation_progress.json"
     if not os.path.exists(path):
