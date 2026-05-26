@@ -346,6 +346,7 @@ async def resume_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     os.remove(PAUSE_FLAG)
     await update.message.reply_text("▶️ Рассылка возобновлена")
 
+@manager_only
 async def report_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from datetime import datetime
     import generate_report
