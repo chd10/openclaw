@@ -45,3 +45,4 @@ def search_price(query: str) -> list[dict]:
             results.append({"article": article, "row": row.to_dict()})
 
     return results
+# test change
