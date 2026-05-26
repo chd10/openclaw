@@ -1,0 +1,7 @@
+anthropic
+python-telegram-bot
+flask
+requests
+pandas
+openpyxl
+reportlab
