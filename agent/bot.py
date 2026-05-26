@@ -780,6 +780,7 @@ def _format_bitrix_card(email: str, data: dict) -> str:
     return "\n".join(lines)
 
 
+@manager_only
 async def client_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.message.reply_text("Использование: /client email@example.com")
