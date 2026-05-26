@@ -330,6 +330,7 @@ async def send_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         await update.message.reply_text(f"❌ Ошибка: {str(e)}")
 
+@manager_only
 async def pause_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if os.path.exists(PAUSE_FLAG):
         await update.message.reply_text("⏸ Рассылка уже на паузе")
