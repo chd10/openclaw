@@ -383,6 +383,7 @@ def _confirmations_on_date(confs, date_str):
     return confirmed, unsubscribed
 
 
+@manager_only
 async def daily_report_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from datetime import datetime
     progress = _load_json(CAMPAIGN_PROGRESS_FILE,
