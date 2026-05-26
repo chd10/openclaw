@@ -548,6 +548,7 @@ async def reactivation_stats_command(update: Update, context: ContextTypes.DEFAU
     )
 
 
+@manager_only
 async def email_log_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     import email_log as el
     records = el.get_last_n(10)
