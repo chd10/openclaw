@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  openclaw:
+    build: .
+    container_name: openclaw
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - /opt/openclaw/data:/data
+      - /opt/openclaw:/opt/openclaw
+      - /opt/openclaw/agent:/app
+    env_file:
+      - .env
