@@ -212,8 +212,8 @@ def run_campaign(limit=DAILY_LIMIT):
     results = {"sent": 0, "skipped": 0, "failed": 0}
 
     for contact in fetch_contacts():
-        if sent_today >= limit:
-            print(f"Дневной лимит {limit} писем достигнут")
+        if results["sent"] >= limit:
+            print(f"Лимит {limit} писем за этот запуск достигнут")
             break
 
         email = extract_email(contact)

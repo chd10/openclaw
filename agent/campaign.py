@@ -66,8 +66,8 @@ def run_campaign(limit=DAILY_LIMIT):
     results = {"sent": 0, "skipped": 0, "failed": 0}
 
     for _, row in df.iterrows():
-        if sent_today >= limit:
-            print(f"Дневной лимит {limit} писем достигнут")
+        if results["sent"] >= limit:
+            print(f"Лимит {limit} писем за этот запуск достигнут")
             break
 
         email = str(row["email"]).strip()
