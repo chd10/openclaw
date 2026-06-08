@@ -2,6 +2,8 @@ import os
 import json
 import time
 import uuid
+import secrets
+import string
 import smtplib
 import imaplib
 import requests
@@ -11,6 +13,7 @@ from email.mime.multipart import MIMEMultipart
 from email.utils import make_msgid, formatdate
 
 import email_log
+import email_tokens
 
 DATA_DIR = "/data"
 PROGRESS_FILE = f"{DATA_DIR}/reactivation_progress.json"
@@ -108,7 +111,7 @@ def lead_products(lead_id):
     return [row.get("PRODUCT_NAME", "").strip() for row in page.get("result", []) if row.get("PRODUCT_NAME")]
 
 
-def build_email(name, lead_title, products, track_url=""):
+def build_email(name, lead_title, products, track_url="", valli_token=None):
     if products:
         items_html = "<ul>" + "".join(f"<li>{p}</li>" for p in products[:5]) + "</ul>"
         request_block = f"<p>В вашем запросе мы тогда обсуждали следующее оборудование:</p>{items_html}"
@@ -120,6 +123,20 @@ def build_email(name, lead_title, products, track_url=""):
     unsub = f"{UNSUB_BASE}?email={SMTP_USER}"
     pixel = (f'<img src="{track_url}" width="1" height="1" style="display:none" alt="">'
              if track_url else "")
+    _valli_start = valli_token if valli_token else "re-email"
+    valli_block = (
+        '<div style="background:#f0f7ff; padding:15px; border-radius:4px; margin: 20px 0; text-align:center;">'
+        '<p style="margin:0 0 10px 0; font-size:14px; color:#333;">'
+        'Нужна актуальная цена или наличие? Спросите у Валли — робота-закупщика eDiscom 🤖'
+        '</p>'
+        f'<a href="https://t.me/Wally0526_bot?start={_valli_start}" '
+        'style="background-color:#0066cc; color:white; padding:10px 25px; '
+        'text-decoration:none; border-radius:4px; font-size:14px;">'
+        'Написать Валли →'
+        '</a>'
+        '<p style="margin:10px 0 0 0; font-size:12px; color:#666;">🔒 Ваши запросы конфиденциальны</p>'
+        '</div>'
+    )
     html = f"""<html><body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
 <div style="border-bottom: 3px solid #0066cc; padding-bottom: 15px; margin-bottom: 25px;">
     <span style="font-size: 20px; font-weight: bold; color: #0066cc;">eDiscom</span>
@@ -134,6 +151,7 @@ def build_email(name, lead_title, products, track_url=""):
     <li>Есть ли актуальные задачи по сетевой инфраструктуре, где мы могли бы быть полезны сейчас?</li>
 </ul>
 <p>Любая обратная связь поможет нам работать лучше. Ответьте просто этим письмом — оно придёт мне напрямую.</p>
+{valli_block}
 <p>С уважением,<br>Черенков Дмитрий Анатольевич<br>ООО «Едиском» | <a href="https://www.ediscom.ru" style="color:#0066cc;">www.ediscom.ru</a> | +7-495-710-71-02</p>
 <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0;">
 <p style="font-size: 11px;"><a href="{unsub}" style="color: #999;">Отписаться от рассылки</a></p>
@@ -164,10 +182,16 @@ def save_to_sent(msg):
         print(f"IMAP: не удалось сохранить копию в «Отправленные»: {e}", flush=True)
 
 
+def _make_valli_token(prefix):
+    rnd = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(8))
+    return f"{prefix}-{rnd}"
+
+
 def send_email(to_email, name, lead_title, products):
     track_token = str(uuid.uuid4())
     track_url = f"https://confirm.netbazara.com/track?token={track_token}&email={to_email}"
-    html = build_email(name, lead_title, products, track_url)
+    valli_token = _make_valli_token("re")
+    html = build_email(name, lead_title, products, track_url, valli_token=valli_token)
     subject = f"{name}, как сложилось с закупкой оборудования?"
     msg = MIMEMultipart("alternative")
     msg["From"] = f"eDiscom <{SMTP_USER}>"
@@ -183,6 +207,7 @@ def send_email(to_email, name, lead_title, products):
 
     save_to_sent(msg)
     email_log.append_entry(to_email, subject, "reactivation", 1, track_token)
+    email_tokens.save_token(valli_token, to_email, "reactivation")
 
 
 def run_campaign(limit=DAILY_LIMIT):

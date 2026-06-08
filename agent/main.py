@@ -1,6 +1,8 @@
 import os
 import time
 import uuid
+import secrets
+import string
 import imaplib
 import anthropic
 import smtplib
@@ -9,6 +11,7 @@ from email.mime.multipart import MIMEMultipart
 from email.utils import formatdate, make_msgid
 from templates import get_template, get_subject
 import email_log
+import email_tokens
 
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
@@ -58,6 +61,11 @@ def generate_email_text(contact_name, business_context):
     )
     return message.content[0].text
 
+def _make_valli_token(prefix):
+    rnd = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(8))
+    return f"{prefix}-{rnd}"
+
+
 def send_email(to_email, contact_name, business_context="сетевое оборудование и телекоммуникации"):
     token = str(uuid.uuid4())
     track_token = str(uuid.uuid4())
@@ -65,8 +73,9 @@ def send_email(to_email, contact_name, business_context="сетевое обор
     unsubscribe_link = f"{UNSUB_BASE}?email={to_email}"
     track_url = f"https://confirm.netbazara.com/track?token={track_token}&email={to_email}"
 
+    valli_token = _make_valli_token("rp")
     variant = next_variant()
-    html = get_template(variant, contact_name, confirm_link, unsubscribe_link, track_url)
+    html = get_template(variant, contact_name, confirm_link, unsubscribe_link, track_url, valli_token=valli_token)
     subject = get_subject(variant)
 
     msg = MIMEMultipart("alternative")
@@ -83,6 +92,7 @@ def send_email(to_email, contact_name, business_context="сетевое обор
         server.send_message(msg)
 
     email_log.append_entry(to_email, subject, "re-permission", variant, track_token)
+    email_tokens.save_token(valli_token, to_email, "re-permission")
 
     return token, msg
 
