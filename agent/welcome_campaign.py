@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 DATA_DIR           = "/data"
 CONFIRMATIONS_FILE = f"{DATA_DIR}/confirmations.json"
 WELCOMED_FILE      = f"{DATA_DIR}/welcomed.json"
+BOUNCED_FILE       = f"{DATA_DIR}/bounced.json"
 UNSUB_BASE         = "https://confirm.netbazara.com/unsubscribe"
 WELCOME_SUBJECT    = "Спасибо за подписку — и кое-что полезное"
 TEST_EMAIL         = "chd10@ya.ru"
@@ -71,6 +72,14 @@ def _load_json(path, default):
 def _save_json(path, data):
     with open(path, "w") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def _load_bounced_emails():
+    """Return set of bounced email addresses from bounced.json."""
+    if not os.path.exists(BOUNCED_FILE):
+        return set()
+    with open(BOUNCED_FILE) as f:
+        return {b["email"] for b in json.load(f)}
 
 
 def _confirmed_sorted(confirmations):
@@ -221,47 +230,49 @@ def mode_mark_legacy():
 
 
 def mode_dry_run_first():
-    confirmations = _load_json(CONFIRMATIONS_FILE, {})
-    welcomed      = _load_json(WELCOMED_FILE, {})
-    sorted_conf   = _confirmed_sorted(confirmations)
-    top10         = sorted_conf[:FIRST_BATCH_SIZE]
-    now           = datetime.now()
+    confirmations  = _load_json(CONFIRMATIONS_FILE, {})
+    welcomed       = _load_json(WELCOMED_FILE, {})
+    bounced_emails = _load_bounced_emails()
+    sorted_conf    = _confirmed_sorted(confirmations)
+    top10          = sorted_conf[:FIRST_BATCH_SIZE]
+    now            = datetime.now()
 
     print(f"Топ-{FIRST_BATCH_SIZE} свежих confirmed (по дате убыв.):")
     eligible_count = 0
-    for i, (email, info) in enumerate(top10, 1):
-        in_welcomed = email in welcomed
-        elig = _is_eligible(info, now) and not in_welcomed
+    for i, (em, info) in enumerate(top10, 1):
         date_str = info.get("date", "")[:16]
         dt = _parse_date(info.get("date", ""))
         age_h = (now - dt).total_seconds() / 3600 if dt else 0
-        if in_welcomed:
-            status = f"уже в welcomed ({welcomed[email].get('status')})"
+        if em in welcomed:
+            status = f"уже в welcomed ({welcomed[em].get('status')})"
+        elif em in bounced_emails:
+            status = "bounce — исключён"
         elif not _is_eligible(info, now):
             status = f"ждёт 24ч (возраст {age_h:.1f}ч)"
         else:
             status = "ELIGIBLE ✓"
             eligible_count += 1
-        print(f"  {i:2d}. {email:40s} [{date_str}]  {status}")
+        print(f"  {i:2d}. {em:40s} [{date_str}]  {status}")
     print(f"\nEligible для --run-first: {eligible_count}")
 
 
 def mode_run_first():
-    confirmations = _load_json(CONFIRMATIONS_FILE, {})
-    welcomed      = _load_json(WELCOMED_FILE, {})
-    sorted_conf   = _confirmed_sorted(confirmations)
-    top10         = sorted_conf[:FIRST_BATCH_SIZE]
-    now           = datetime.now()
+    confirmations  = _load_json(CONFIRMATIONS_FILE, {})
+    welcomed       = _load_json(WELCOMED_FILE, {})
+    bounced_emails = _load_bounced_emails()
+    sorted_conf    = _confirmed_sorted(confirmations)
+    top10          = sorted_conf[:FIRST_BATCH_SIZE]
+    now            = datetime.now()
 
     sent = errors = skipped = 0
-    for email, info in top10:
-        if email in welcomed:
+    for em, info in top10:
+        if em in welcomed or em in bounced_emails:
             skipped += 1
             continue
         if not _is_eligible(info, now):
             skipped += 1
             continue
-        _, err = send_one(email, welcomed, write_welcomed=True)
+        _, err = send_one(em, welcomed, write_welcomed=True)
         if err:
             errors += 1
         else:
@@ -269,7 +280,7 @@ def mode_run_first():
 
     not_yet = sum(
         1 for e, v in top10
-        if e not in welcomed and not _is_eligible(v, now)
+        if e not in welcomed and e not in bounced_emails and not _is_eligible(v, now)
     )
     print(f"\n--run-first: отправлено={sent}, пропущено={skipped}, не прошло 24ч={not_yet}, ошибок={errors}")
 
@@ -288,26 +299,27 @@ def mode_test():
 
 
 def mode_cron():
-    confirmations = _load_json(CONFIRMATIONS_FILE, {})
-    welcomed      = _load_json(WELCOMED_FILE, {})
-    sorted_conf   = _confirmed_sorted(confirmations)
-    now           = datetime.now()
+    confirmations  = _load_json(CONFIRMATIONS_FILE, {})
+    welcomed       = _load_json(WELCOMED_FILE, {})
+    bounced_emails = _load_bounced_emails()
+    sorted_conf    = _confirmed_sorted(confirmations)
+    now            = datetime.now()
 
     sent = errors = skipped = 0
-    for email, info in sorted_conf:
-        if email in welcomed:
+    for em, info in sorted_conf:
+        if em in welcomed or em in bounced_emails:
             skipped += 1
             continue
         if not _is_eligible(info, now):
             skipped += 1
             continue
-        _, err = send_one(email, welcomed, write_welcomed=True)
+        _, err = send_one(em, welcomed, write_welcomed=True)
         if err:
             errors += 1
         else:
             sent += 1
 
-    print(f"\nCron: отправлено={sent}, пропущено/уже получили={skipped}, ошибок={errors}")
+    print(f"\nCron: отправлено={sent}, пропущено/bounce/уже получили={skipped}, ошибок={errors}")
 
 
 # ── entry point ───────────────────────────────────────────────────────────────
