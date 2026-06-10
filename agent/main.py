@@ -15,8 +15,8 @@ import email_tokens
 
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-SMTP_SERVER = "mail.privateemail.com"
-SMTP_PORT = 587
+SMTP_SERVER = os.getenv("SMTP_SERVER", "mail.privateemail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PASS = os.getenv("SMTP_PASS")
 IMAP_SERVER = os.getenv("IMAP_SERVER", "mail.privateemail.com")
