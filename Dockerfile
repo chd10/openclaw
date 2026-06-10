@@ -7,4 +7,4 @@ RUN pip install -r requirements.txt
 
 COPY agent/ .
 
-CMD ["sh", "-c", "python web.py & python bot.py"]
+CMD ["python", "bot.py"]

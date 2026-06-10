@@ -99,7 +99,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_history[uid].append({"role": "user", "content": text})
 
     try:
-        r = requests.get(STATS_URL, timeout=3).json()
+        r = _get_stats()
         stats_text = f"confirmed={r['confirmed']}, unsubscribed={r['unsubscribed']}, total={r['total']}"
     except:
         stats_text = "недоступна"
@@ -246,7 +246,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"✅ Письмо отправлено на {email}!")
 
         elif action == "stats":
-            r = requests.get(STATS_URL, timeout=5).json()
+            r = _get_stats()
             await update.message.reply_text(
                 f"📊 Статистика:\n\n"
                 f"📧 Всего: {r['total']}\n"
@@ -307,7 +307,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if query.data == "stats":
         try:
-            r = requests.get(STATS_URL, timeout=5).json()
+            r = _get_stats()
             await query.edit_message_text(
                 f"📊 Статистика:\n\n"
                 f"📧 Всего: {r['total']}\n"
@@ -418,6 +418,13 @@ def _confirmations_on_date(confs, date_str):
             elif status == "unsubscribed":
                 unsubscribed.append(email)
     return confirmed, unsubscribed
+
+
+def _get_stats() -> dict:
+    db = _load_json(CONFIRMATIONS_FILE, {})
+    confirmed = sum(1 for v in db.values() if v.get("status") == "confirmed")
+    unsubscribed = sum(1 for v in db.values() if v.get("status") == "unsubscribed")
+    return {"confirmed": confirmed, "unsubscribed": unsubscribed, "total": len(db)}
 
 
 @manager_only
