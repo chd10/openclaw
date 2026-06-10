@@ -4,6 +4,7 @@ import time
 import pandas as pd
 from datetime import datetime
 from main import send_email, save_to_sent
+import email_validator
 
 DATA_DIR = "/data"
 XLS_FILE = f"{DATA_DIR}/export_20260511_Актив.xlsx"
@@ -61,9 +62,12 @@ def run_campaign(limit=DAILY_LIMIT):
         with open(BOUNCED_FILE) as f:
             bounced_emails = {b["email"] for b in json.load(f)}
 
+    invalid_emails = email_validator.load_invalid()
+
     sent_emails = set(progress["sent"])
     sent_today = progress["today_count"]
-    results = {"sent": 0, "skipped": 0, "failed": 0}
+    results = {"sent": 0, "skipped": 0, "skipped_bounced": 0,
+               "skipped_invalid": 0, "new_invalid": 0, "failed": 0}
 
     for _, row in df.iterrows():
         if results["sent"] >= limit:
@@ -78,7 +82,18 @@ def run_campaign(limit=DAILY_LIMIT):
             continue
         if email in bounced_emails:
             print(f"Пропуск (bounce): {email}")
-            results["skipped"] += 1
+            results["skipped_bounced"] += 1
+            continue
+        if email in invalid_emails:
+            results["skipped_invalid"] += 1
+            continue
+        v = email_validator.validate(email)
+        if not v["valid"]:
+            email_validator.save_invalid(email, v["reason"])
+            invalid_emails[email] = {"reason": v["reason"]}
+            print(f"Пропуск ({v['reason']}): {email}")
+            results["skipped_invalid"] += 1
+            results["new_invalid"] += 1
             continue
 
         name = str(row["Name"]).strip() if pd.notna(row["Name"]) else ""
@@ -108,7 +123,12 @@ def run_campaign(limit=DAILY_LIMIT):
     progress["last_run"] = str(datetime.now())
     save_progress(progress)
 
-    print(f"\nРезультат: отправлено={results['sent']}, пропущено={results['skipped']}, ошибок={results['failed']}")
+    print(
+        f"\nРезультат: отправлено={results['sent']}, "
+        f"пропущено_bounce={results['skipped_bounced']}, "
+        f"пропущено_invalid={results['skipped_invalid']} (новых_invalid={results['new_invalid']}), "
+        f"пропущено_прочих={results['skipped']}, ошибок={results['failed']}"
+    )
     return results
 
 if __name__ == "__main__":
