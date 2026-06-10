@@ -24,6 +24,12 @@ IMAP_B_PORT = 993
 IMAP_B_USER = os.getenv("SMTP_EDISCOM_USER")
 IMAP_B_PASS = os.getenv("SMTP_EDISCOM_PASS")
 
+# Mailbox C: newsletter@netbazara.com (privateemail) — re-permission campaign
+IMAP_C_HOST = "mail.privateemail.com"
+IMAP_C_PORT = 993
+IMAP_C_USER = os.getenv("SMTP_USER")
+IMAP_C_PASS = os.getenv("SMTP_PASS")
+
 BOUNCE_FROM_PATTERNS = ["mailer-daemon", "postmaster"]
 BOUNCE_SUBJECT_KW = [
     "undeliverable", "mail delivery failed", "delivery status notification",
@@ -292,7 +298,19 @@ def run(catch_up_ediscom=False):
     total_new += n
     all_real_replies.extend(replies)
 
-    # Atomic write after both mailboxes
+    # Mailbox C: newsletter@netbazara.com (privateemail) — re-permission campaign
+    # mark_nonbounce_seen=False — клиентские ответы (Re: Подтвердите подписку) НЕ помечаем Seen
+    n, replies = process_inbox(
+        IMAP_C_HOST, IMAP_C_PORT, IMAP_C_USER, IMAP_C_PASS,
+        "netbazara-newsletter",
+        bounced_list, bounced_emails,
+        mark_nonbounce_seen=False,
+        search_all=False,
+    )
+    total_new += n
+    all_real_replies.extend(replies)
+
+    # Atomic write after all three mailboxes
     if total_new > 0:
         _save_bounced(bounced_list)
         print(f"Сохранено новых bounce-адресов: {total_new}", flush=True)
