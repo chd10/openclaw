@@ -9,6 +9,7 @@ from datetime import datetime
 import requests
 
 BOUNCED_FILE = "/data/bounced.json"
+FORWARDED_FILE = "/data/forwarded.json"
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
@@ -160,6 +161,18 @@ def _save_bounced(data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+def _load_forwarded():
+    if os.path.exists(FORWARDED_FILE):
+        with open(FORWARDED_FILE) as f:
+            return json.load(f)
+    return []
+
+
+def _save_forwarded(data):
+    with open(FORWARDED_FILE, "w") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
 def _send_telegram(text):
     if not BOT_TOKEN or not TELEGRAM_CHAT_ID:
         print("WARN: TELEGRAM_CHAT_ID не задан, уведомление не отправлено", flush=True)
@@ -243,6 +256,7 @@ def process_inbox(host, port, user, password, label,
                         "subject": subject,
                         "preview": body[:300].strip(),
                         "label": label,
+                        "message_id": raw_msg.get("Message-ID", "").strip(),
                     })
                     if mark_nonbounce_seen:
                         imap.store(msg_id, "+FLAGS", "\\Seen")
@@ -317,13 +331,25 @@ def run(catch_up_ediscom=False):
     else:
         print("Новых bounce не найдено", flush=True)
 
+    forwarded_ids = _load_forwarded()
+    forwarded_set = set(forwarded_ids)
+    new_forwarded = 0
     for reply in all_real_replies:
+        key = reply.get("message_id") or f"{reply['label']}|{reply['from']}|{reply['subject']}"
+        if key in forwarded_set:
+            continue
         _send_telegram(
             f"📩 Ответ на {reply['label']}\n\n"
             f"От: {reply['from']}\n"
             f"Тема: {reply['subject']}\n\n"
             f"{reply['preview']}"
         )
+        forwarded_set.add(key)
+        forwarded_ids.append(key)
+        new_forwarded += 1
+    if new_forwarded > 0:
+        _save_forwarded(forwarded_ids)
+        print(f"Форвард новых ответов: {new_forwarded}", flush=True)
 
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"[{ts}] Готово. Новых bounce: {total_new}", flush=True)
