@@ -5,6 +5,8 @@ services:
     build: .
     container_name: openclaw
     restart: unless-stopped
+    ports:
+      - "5000:5000"
     volumes:
       - /opt/openclaw/data:/data
       - /opt/openclaw:/opt/openclaw
