@@ -71,7 +71,7 @@ def send_email(to_email, contact_name, business_context="сетевое обор
     track_token = str(uuid.uuid4())
     confirm_link = f"{CONFIRM_BASE}?token={token}&email={to_email}"
     unsubscribe_link = f"{UNSUB_BASE}?email={to_email}"
-    track_url = f"https://confirm.netbazara.com/track?token={track_token}&email={to_email}"
+    track_url = f"https://track.netbazara.com/track?token={track_token}&email={to_email}"
 
     valli_token = _make_valli_token("rp")
     variant = next_variant()
