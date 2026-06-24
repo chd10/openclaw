@@ -19,7 +19,7 @@ CONFIRMATIONS_FILE = "/data/confirmations.json"
 INVITES_FILE       = "/data/valli_invites.json"
 EXCEL_FILE         = "/data/export_20260511_Актив.xlsx"
 UNSUB_BASE  = "https://confirm.netbazara.com/unsubscribe"
-TRACK_BASE  = "https://confirm.netbazara.com/track"
+TRACK_BASE  = "https://track.netbazara.com/track"
 
 SMTP_SERVER = os.getenv("SMTP_EDISCOM_SERVER", "smtp.yandex.ru")
 SMTP_PORT   = int(os.getenv("SMTP_EDISCOM_PORT", "465"))
