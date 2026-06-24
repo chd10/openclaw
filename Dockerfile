@@ -7,4 +7,4 @@ RUN pip install -r requirements.txt
 
 COPY agent/ .
 
-CMD ["python", "bot.py"]
+CMD ["sh", "/opt/openclaw/entrypoint.sh"]
