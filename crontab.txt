@@ -1,0 +1,52 @@
+## ispmanager delete expire logs task
+0 3 * * *	/usr/local/mgr5/sbin/cron-core sbin/mgrctl -m core deletearchivelogs >/dev/null 2>&1
+## ispmanager get actual version handler
+34 10 * * *	/usr/local/mgr5/sbin/cron-core sbin/mgrctl -m core version.actual >/dev/null 2>&1
+## ispmanager usagestat task
+3 3 * * *	/usr/local/mgr5/sbin/cron-core sbin/usagestat >/dev/null 2>&1
+## ispmanager problems autosolve task (/usr/local/mgr5)
+*/5 * * * *	/usr/local/mgr5/sbin/cron-core sbin/mgrctl -m core problems.autosolve >/dev/null 2>&1
+## ispmanager update package cache task
+21 3 * * *	/usr/local/mgr5/sbin/cron-ispmgr sbin/pkgupdate.sh >/dev/null 2>&1
+## ispmanager periodic tasks handler (ispmgr)
+* * * * *	/usr/local/mgr5/sbin/cron-ispmgr sbin/mgrctl -m ispmgr periodic >/dev/null 2>&1
+## ispmanager stat handler (ispmgr)
+45 18 * * *	/usr/local/mgr5/sbin/cron-ispmgr sbin/mgrctl -m ispmgr ispstat >/dev/null 2>&1
+## ispmanager letsencrypt cert update check
+34 3 * * *	/usr/local/mgr5/sbin/cron-ispmgr sbin/mgrctl -m ispmgr letsencrypt.check.update >/dev/null 2>&1
+## ispmanager task which collect system statistics
+*/5 * * * *	/usr/local/mgr5/sbin/cron-ispmgr sbin/mgrctl -m ispmgr sysinfostat >/dev/null 2>&1
+## ispmanager get actual version handler
+14 8 * * *	/usr/local/mgr5/sbin/cron-ispmgr sbin/mgrctl -m ispmgr version.actual >/dev/null 2>&1
+## ispmanager problems autosolve task (/usr/local/mgr5)
+*/5 * * * *	/usr/local/mgr5/sbin/cron-ispmgr sbin/mgrctl -m ispmgr problems.autosolve >/dev/null 2>&1
+## ispmanager upgrade task
+16 6 * * *	/usr/local/mgr5/sbin/cron-ispmgr sbin/pkgupgrade.sh coremanager >/dev/null 2>&1
+## ispmanager metric task
+*/5 * * * *	/usr/local/mgr5/sbin/cron-ispmgr sbin/metric >/dev/null 2>&1
+## ispmanager acme.sh certs update task
+54 3 * * *	/usr/local/mgr5/sbin/cron-ispmgr sbin/mgrctl -m ispmgr acmesh.certs.update >/dev/null 2>&1
+## Check DS records from the domain registrar
+45 4 * * 0	/usr/local/mgr5/sbin/cron-ispmgr sbin/mgrctl -m ispmgr checkdsrecords >/dev/null 2>&1
+0 11,15,18 * * * docker exec openclaw python /app/bounce_processor.py >> /opt/openclaw/logs/bounce_processor.log 2>&1 # openclaw-bounce
+0 9 * * * docker exec valli-valli-1 python /app/agent/update_price.py >> /opt/valli/logs/update_price.log 2>&1
+0 9 * * * /usr/bin/python3 /opt/security/monitor.py --report >> /opt/security/monitor.log 2>&1
+*/10 * * * * /usr/bin/python3 /opt/security/monitor.py watch >> /opt/security/monitor.log 2>&1
+0 6 * * * docker exec openclaw python3 /app/check_balance.py >> /opt/openclaw/logs/check_balance.log 2>&1
+0 15 * * * docker exec openclaw python3 /app/check_balance.py >> /opt/openclaw/logs/check_balance.log 2>&1
+#00 10 * * 1-5 docker exec openclaw python -c "import campaign; campaign.run_campaign(limit=40)" >> /opt/openclaw/logs/campaign.log 2>&1 # openclaw-campaign
+#00 11 * * 1-5 docker exec openclaw python -c "import campaign; campaign.run_campaign(limit=40)" >> /opt/openclaw/logs/campaign.log 2>&1 # openclaw-campaign
+#00 12 * * 1-5 docker exec openclaw python -c "import campaign; campaign.run_campaign(limit=20)" >> /opt/openclaw/logs/campaign.log 2>&1 # openclaw-campaign
+#00 10 * * 1-5 docker exec openclaw python -c "import reactivation_campaign; reactivation_campaign.run_campaign(limit=40)" >> /opt/openclaw/logs/reactivation_campaign.log 2>&1 # openclaw-campaign
+#00 11 * * 1-5 docker exec openclaw python -c "import reactivation_campaign; reactivation_campaign.run_campaign(limit=40)" >> /opt/openclaw/logs/reactivation_campaign.log 2>&1 # openclaw-campaign
+#00 12 * * 1-5 docker exec openclaw python -c "import reactivation_campaign; reactivation_campaign.run_campaign(limit=20)" >> /opt/openclaw/logs/reactivation_campaign.log 2>&1 # openclaw-campaign
+## ispmanager services monitoring task (srvmon)
+*/15 * * * *	/usr/local/mgr5/sbin/cron-ispmgr addon/srvmon >/dev/null 2>&1
+0 * * * * docker exec openclaw python /app/welcome_campaign.py >> /var/log/welcome_campaign.log 2>&1
+*/10 * * * * /opt/openclaw/sync_confirmations.sh >> /opt/openclaw/logs/sync_confirmations.log 2>&1 # consent-sync
+00 10 * * 1-5 docker exec openclaw python -c "import reactivation_campaign; reactivation_campaign.run_campaign(limit=40)" >> /opt/openclaw/logs/reactivation_campaign.log 2>&1 # openclaw-react-v2
+00 11 * * 1-5 docker exec openclaw python -c "import reactivation_campaign; reactivation_campaign.run_campaign(limit=40)" >> /opt/openclaw/logs/reactivation_campaign.log 2>&1 # openclaw-react-v2
+00 12 * * 1-5 docker exec openclaw python -c "import reactivation_campaign; reactivation_campaign.run_campaign(limit=40)" >> /opt/openclaw/logs/reactivation_campaign.log 2>&1 # openclaw-react-v2
+30 10 * * 1-5 docker exec openclaw python -c "import campaign; campaign.run_campaign(limit=40)" >> /opt/openclaw/logs/campaign.log 2>&1 # openclaw-main-v2
+30 11 * * 1-5 docker exec openclaw python -c "import campaign; campaign.run_campaign(limit=40)" >> /opt/openclaw/logs/campaign.log 2>&1 # openclaw-main-v2
+30 12 * * 1-5 docker exec openclaw python -c "import campaign; campaign.run_campaign(limit=40)" >> /opt/openclaw/logs/campaign.log 2>&1 # openclaw-main-v2
